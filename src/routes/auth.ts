@@ -1,6 +1,6 @@
 import  {NextFunction,Request,Response} from 'express';
 import { compareSync } from "bcrypt";
-import passport from "passport";
+import passport, { use } from "passport";
 import { Strategy } from "passport-local";
 import { UserDatabase } from "../db/userDatabase";
 import { canRoleExecuteMethod,getUserRolePermissionsOnAPI} from "../auth/permissions"
@@ -49,7 +49,8 @@ passport.use(
 );
 
 passport.serializeUser((user: any | User, done) => {
-    done(null, 3);
+    const us = user
+    done(null, us.user.id);
 });
 
 passport.deserializeUser(async (id: number, done) => {
@@ -88,7 +89,7 @@ export async function authorizeOnRole(
         const decodedToken = jwt.verify(token!, "Claralia") as { userId: number, };
         const userId = decodedToken.userId;
         const dbUser = await UserDatabase.getUserById(userId);
-    
+     
         
        
         // You see all of this?

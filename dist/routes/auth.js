@@ -44,7 +44,8 @@ passport_1.default.use("local", new passport_local_1.Strategy({
     });
 }));
 passport_1.default.serializeUser((user, done) => {
-    done(null, 3);
+    const us = user;
+    done(null, us.user.id);
 });
 passport_1.default.deserializeUser((id, done) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield userDatabase_1.UserDatabase.getUserById(id);
