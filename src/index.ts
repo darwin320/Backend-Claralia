@@ -43,6 +43,7 @@ import session from "express-session";
         app.use(passport.session());
             
         configureAuthModule(app);
+        
         configureApiModule(app);
 
         CronJobManager.getInstance();

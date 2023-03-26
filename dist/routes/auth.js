@@ -18,6 +18,7 @@ const passport_1 = __importDefault(require("passport"));
 const passport_local_1 = require("passport-local");
 const userDatabase_1 = require("../db/userDatabase");
 const permissions_1 = require("../auth/permissions");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 passport_1.default.use("local", new passport_local_1.Strategy({
     usernameField: "email",
     passwordField: "password",
@@ -26,7 +27,8 @@ passport_1.default.use("local", new passport_local_1.Strategy({
         const user = yield userDatabase_1.UserDatabase.getUserByEmail(email);
         if (user) {
             if ((0, bcrypt_1.compareSync)(password, user.password)) {
-                return done(null, user);
+                const token = jsonwebtoken_1.default.sign({ userId: user.id }, "Claralia");
+                return done(null, { user: user, token });
             }
             else {
                 return done(null, false, {
@@ -42,7 +44,7 @@ passport_1.default.use("local", new passport_local_1.Strategy({
     });
 }));
 passport_1.default.serializeUser((user, done) => {
-    done(null, user.id);
+    done(null, 3);
 });
 passport_1.default.deserializeUser((id, done) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield userDatabase_1.UserDatabase.getUserById(id);
@@ -58,9 +60,15 @@ function authorize(request, response, next) {
 }
 exports.authorize = authorize;
 function authorizeOnRole(request, response, next) {
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
+        const user = request.user;
+        const token = (_b = (_a = request.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(" ")[1]) === null || _b === void 0 ? void 0 : _b.replace(/^"|"$/g, "");
+        const check = user && token;
         if (request.user) {
-            console.log("aquiiiiii");
+            const decodedToken = jsonwebtoken_1.default.verify(token, "Claralia");
+            const userId = decodedToken.userId;
+            const dbUser = yield userDatabase_1.UserDatabase.getUserById(userId);
             // You see all of this?
             // All of this is needed so we take the second part of the url to see
             // if the user has permission to the API route. So, take a look a this
@@ -68,7 +76,7 @@ function authorizeOnRole(request, response, next) {
             //
             // /api/users: This should list the users, but how we make sure that
             // we get the 'users' part? That's why this is done.
-            //
+            //s
             // First, we replace the empty spaces, just to be safe, then we split
             // the url. After that, we remove the empty values from the array and
             // we get the second element and boom. We got it.
@@ -82,16 +90,15 @@ function authorizeOnRole(request, response, next) {
             routeApi);
             // Check if the permission exists and then if the role can execute that
             // permission.
-            if (permission && (0, permissions_1.canRoleExecuteMethod)(permission, request.method)) {
+            if (permission && (0, permissions_1.canRoleExecuteMethod)(permission, request.method) && dbUser) {
+                request.user = dbUser;
                 next();
             }
             else {
-                console.log("jiji1");
                 response.sendStatus(401);
             }
         }
         else {
-            console.log("jiji2");
             response.sendStatus(401);
         }
     });
@@ -101,8 +108,9 @@ function configureAuthModule(app) {
     app.post("/login/password", passport_1.default.authenticate("local", {
         failureMessage: true,
         successMessage: true,
-    }), (_, response) => {
-        response.sendStatus(200);
+    }), (req, res) => {
+        const user = req.user;
+        res.status(200).json({ token: user.token });
     });
     app.get("/auth/canActivate", authorize, (_, response) => response.sendStatus(200));
     app.post("/logout", authorize, (request, response, next) => {
