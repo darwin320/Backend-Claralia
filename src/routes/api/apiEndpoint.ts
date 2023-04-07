@@ -19,7 +19,7 @@ export abstract class ApiEndpoint {
         this.searchElements(app);
 
         this.getElements(app);
-
+        this.getElementsType(app);
         // GET, POST, PUT Methods.
         this.getElementById(app);
         this.createElement(app);
@@ -55,6 +55,9 @@ export abstract class ApiEndpoint {
     }
 
     public abstract getElements(app: any): void;
+
+    public abstract getElementsType(app: any): void;
+    
 
     public abstract searchElements(app: any): void;
 
