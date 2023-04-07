@@ -17,6 +17,9 @@ const configDatabase_1 = require("../../db/configDatabase");
 const apiEndpoint_1 = require("../api/apiEndpoint");
 const auth_1 = require("../auth");
 class ConfigApiEndpoint extends apiEndpoint_1.ApiEndpoint {
+    getElementsType(app) {
+        // throw new Error("Method not implemented.");
+    }
     constructor() {
         super("config");
     }

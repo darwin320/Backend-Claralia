@@ -5,6 +5,9 @@ import { ApiEndpoint } from "../api/apiEndpoint";
 import { authorize, authorizeOnRole } from "../auth";
 
 export class ActionsApiEndpoint extends ApiEndpoint {
+    public getElementsType(app: any): void {
+        //throw new Error("Method not implemented.");
+    }
     constructor() {
         super("actions");
     }

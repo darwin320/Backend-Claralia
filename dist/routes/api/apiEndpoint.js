@@ -15,6 +15,7 @@ class ApiEndpoint {
     registerMethods(app) {
         this.searchElements(app);
         this.getElements(app);
+        this.getElementsType(app);
         // GET, POST, PUT Methods.
         this.getElementById(app);
         this.createElement(app);

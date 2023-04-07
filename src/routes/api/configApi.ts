@@ -11,6 +11,9 @@ export type InvoiceConfigDto = {
 };
 
 export class ConfigApiEndpoint extends ApiEndpoint {
+    public getElementsType(app: any): void {
+       // throw new Error("Method not implemented.");
+    }
     constructor() {
         super("config");
     }
