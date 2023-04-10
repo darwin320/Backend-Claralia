@@ -75,6 +75,28 @@ export class ReservationApiEndpoint extends ApiEndpoint {
         );
     }
     public createElement(app: any): void {
+        app.post(
+            this.getUrlWithExtension("create"),
+            authorize,
+            authorizeOnRole,
+            logMotion,
+            async (request: Request, response: Response) => {
+                const result = await ReservationDatabase.createReservation({
+                    idUser: request.body.idUser,
+                    nameClient: request.body.nameClient,
+                    salon : request.body.salon,
+                    cantidadAdultos: request.body.cantidadAdultos,
+                    cantidadNinos: request.body.cantidadNinos,
+                    fecha: request.body.fecha,
+                    horaInicio: request.body.horaInicio,
+                    horaFin: request.body.horaFin,
+                    tipoEvento : request.body.tipoEvento,
+                    downPayment: request.body.downPayment,
+                    priceRoomPerHour: request.body.priceRoomPerHour
+                });
+                response.send(result);
+            }
+        );
        // throw new Error("Method not implemented.");
     }
     public updateElement(app: any): void {

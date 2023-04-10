@@ -81,4 +81,27 @@ var ReservationDatabase;
         });
     }
     ReservationDatabase.searchReservation = searchReservation;
+    function createReservation(reservationInformation) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield (0, database_1.withPrismaClient)((prisma) => __awaiter(this, void 0, void 0, function* () {
+                const service = yield prisma.reservacion.create({
+                    data: {
+                        idUser: reservationInformation.idUser,
+                        nameClient: reservationInformation.nameClient,
+                        salon: reservationInformation.salon,
+                        cantidadAdultos: reservationInformation.cantidadAdultos,
+                        cantidadNinos: reservationInformation.cantidadNinos,
+                        fecha: reservationInformation.fecha,
+                        horaInicio: reservationInformation.horaInicio,
+                        horaFin: reservationInformation.horaFin,
+                        tipoEvento: reservationInformation.tipoEvento,
+                        downPayment: reservationInformation.downPayment,
+                        priceRoomPerHour: reservationInformation.priceRoomPerHour
+                    },
+                });
+                return service !== null && service !== void 0 ? service : null;
+            }));
+        });
+    }
+    ReservationDatabase.createReservation = createReservation;
 })(ReservationDatabase = exports.ReservationDatabase || (exports.ReservationDatabase = {}));

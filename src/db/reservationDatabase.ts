@@ -1,6 +1,7 @@
 import {PrismaClient ,Reservacion,TypeSalon,TypeEvent} from "@prisma/client";
 import { SearchResult, SEARCH_AMOUNT, withPrismaClient } from "./database";
 
+
 export namespace ReservationDatabase{
 
     export async function getReservations() { 
@@ -75,6 +76,41 @@ export namespace ReservationDatabase{
                     search: reservacions,
                     searchCount: serviceCount,
                 };
+            }
+        );
+    }
+
+    export async function createReservation(reservationInformation: {
+        idUser:number;
+        nameClient: string;
+        salon: TypeSalon;
+        cantidadAdultos: number;
+        cantidadNinos: number;
+        fecha: string;
+        horaInicio: Date;
+        horaFin: Date;
+        tipoEvento: TypeEvent;
+        downPayment: number;
+        priceRoomPerHour: number;
+    }) {
+        return await withPrismaClient<Reservacion | null>(
+            async (prisma: PrismaClient) => {
+                const service = await prisma.reservacion.create({
+                    data: {
+                        idUser: reservationInformation.idUser,
+                        nameClient: reservationInformation.nameClient,
+                        salon : reservationInformation.salon,
+                        cantidadAdultos: reservationInformation.cantidadAdultos,
+                        cantidadNinos: reservationInformation.cantidadNinos,
+                        fecha: reservationInformation.fecha,
+                        horaInicio: reservationInformation.horaInicio,
+                        horaFin: reservationInformation.horaFin,
+                        tipoEvento : reservationInformation.tipoEvento,
+                        downPayment: reservationInformation.downPayment,
+                        priceRoomPerHour: reservationInformation.priceRoomPerHour
+                    },
+                });
+                return service ?? null;
             }
         );
     }
