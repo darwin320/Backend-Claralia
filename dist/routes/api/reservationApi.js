@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReservationApiEndpoint = void 0;
+const audit_1 = require("../../audit/audit");
 const reservationDatabase_1 = require("../../db/reservationDatabase");
 const apiEndpoint_1 = require("../api/apiEndpoint");
 const auth_1 = require("../auth");
@@ -49,6 +50,22 @@ class ReservationApiEndpoint extends apiEndpoint_1.ApiEndpoint {
         }));
     }
     createElement(app) {
+        app.post(this.getUrlWithExtension("create"), auth_1.authorize, auth_1.authorizeOnRole, audit_1.logMotion, (request, response) => __awaiter(this, void 0, void 0, function* () {
+            const result = yield reservationDatabase_1.ReservationDatabase.createReservation({
+                idUser: request.body.idUser,
+                nameClient: request.body.nameClient,
+                salon: request.body.salon,
+                cantidadAdultos: request.body.cantidadAdultos,
+                cantidadNinos: request.body.cantidadNinos,
+                fecha: request.body.fecha,
+                horaInicio: request.body.horaInicio,
+                horaFin: request.body.horaFin,
+                tipoEvento: request.body.tipoEvento,
+                downPayment: request.body.downPayment,
+                priceRoomPerHour: request.body.priceRoomPerHour
+            });
+            response.send(result);
+        }));
         // throw new Error("Method not implemented.");
     }
     updateElement(app) {

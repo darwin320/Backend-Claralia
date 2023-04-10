@@ -12,9 +12,9 @@ export const REGISTERED_APIS: ApiEndpoint[] = [
     new ReservationApiEndpoint()
     
 ];
-
+//CONFIGURA MODULIS
 export function configureApiModule(app: any) {
     for (const api of REGISTERED_APIS) {
-        api.registerMethods(app);
+        api.registerMethods(app); 
     }
 }
