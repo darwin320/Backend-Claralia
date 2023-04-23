@@ -1,4 +1,4 @@
-import {PrismaClient ,Reservacion,TypeSalon,TypeEvent} from "@prisma/client";
+import {PrismaClient ,Reservacion,TypeSalon,TypeEvent,Inventory} from "@prisma/client";
 import { SearchResult, SEARCH_AMOUNT, withPrismaClient } from "./database";
 
 
@@ -63,6 +63,11 @@ export namespace ReservationDatabase{
                     };
                 }
 
+                whereQuery = {
+                    ...whereQuery,
+                    state: true, // Agrega el filtro para state en true
+                };
+
                 const serviceCount = await prisma.reservacion.count({
                     where: whereQuery ?? {},
                 });
@@ -80,6 +85,21 @@ export namespace ReservationDatabase{
         );
     }
 
+    export async function deleteReservationById(id: number) {
+        return await withPrismaClient(async (prisma: PrismaClient) => {
+
+            const reservation = await prisma.reservacion.update({
+                where: {
+                    id,
+                },
+                data: {
+                    state: false,
+                },
+            });        
+        });
+    }
+
+
     export async function createReservation(reservationInformation: {
         idUser:number;
         nameClient: string;
@@ -87,15 +107,17 @@ export namespace ReservationDatabase{
         cantidadAdultos: number;
         cantidadNinos: number;
         fecha: string;
+        fechaFin: string;
         horaInicio: Date;
         horaFin: Date;
         tipoEvento: TypeEvent;
         downPayment: number;
         priceRoomPerHour: number;
+        inventory:  Inventory[];
     }) {
         return await withPrismaClient<Reservacion | null>(
             async (prisma: PrismaClient) => {
-                const service = await prisma.reservacion.create({
+                const reservation = await prisma.reservacion.create({
                     data: {
                         idUser: reservationInformation.idUser,
                         nameClient: reservationInformation.nameClient,
@@ -103,16 +125,30 @@ export namespace ReservationDatabase{
                         cantidadAdultos: reservationInformation.cantidadAdultos,
                         cantidadNinos: reservationInformation.cantidadNinos,
                         fecha: reservationInformation.fecha,
+                        fechaFin: reservationInformation.fechaFin,
                         horaInicio: reservationInformation.horaInicio,
                         horaFin: reservationInformation.horaFin,
                         tipoEvento : reservationInformation.tipoEvento,
                         downPayment: reservationInformation.downPayment,
-                        priceRoomPerHour: reservationInformation.priceRoomPerHour
+                        priceRoomPerHour: reservationInformation.priceRoomPerHour,
+                        inventory: reservationInformation.inventory
                     },
                 });
-                return service ?? null;
+                return reservation ?? null;
             }
         );
+    }
+
+
+    export async function updateReservationById(id: number, changes: Reservacion) {
+        return await withPrismaClient(async (prisma: PrismaClient) => {
+            return await prisma.reservacion.update({
+                where: {
+                    id,
+                },
+                data: changes,
+            });
+        });
     }
 
 

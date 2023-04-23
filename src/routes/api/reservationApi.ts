@@ -88,11 +88,13 @@ export class ReservationApiEndpoint extends ApiEndpoint {
                     cantidadAdultos: request.body.cantidadAdultos,
                     cantidadNinos: request.body.cantidadNinos,
                     fecha: request.body.fecha,
+                    fechaFin : request.body.fechaFin,
                     horaInicio: request.body.horaInicio,
                     horaFin: request.body.horaFin,
                     tipoEvento : request.body.tipoEvento,
                     downPayment: request.body.downPayment,
-                    priceRoomPerHour: request.body.priceRoomPerHour
+                    priceRoomPerHour: request.body.priceRoomPerHour,
+                    inventory: request.body.inventory
                 });
                 response.send(result);
             }
@@ -100,9 +102,39 @@ export class ReservationApiEndpoint extends ApiEndpoint {
        // throw new Error("Method not implemented.");
     }
     public updateElement(app: any): void {
+        app.put(
+            this.getUrlWithExtension("update/:reservationId"),
+            authorize,
+            authorizeOnRole,
+            logMotion,
+            async (request: Request, response: Response) => {
+                const reservationId = parseInt(request.params["reservationId"]);
+                const changes = request.body;
+
+                const result = await ReservationDatabase.updateReservationById(
+                    reservationId,
+                    changes
+                );
+                response.send(result);
+            }
+        );
         //throw new Error("Method not implemented.");
     }
     public deleteElement(app: any): void {
+        app.delete(
+            this.getUrlWithExtension("delete/:ReservationId"),
+            authorize,
+            authorizeOnRole,
+            logMotion,
+            async (request: Request, response: Response) => {
+                const reservationId = parseInt(request.params["ReservationId"]);
+
+                const result = await ReservationDatabase.deleteReservationById(
+                    reservationId
+                );
+                response.send(result);
+            }
+        );
         //throw new Error("Method not implemented.");
     }
     public registerCustomMethods(app: any): void {

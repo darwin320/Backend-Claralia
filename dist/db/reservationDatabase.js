@@ -65,6 +65,7 @@ var ReservationDatabase;
                         ],
                     };
                 }
+                whereQuery = Object.assign(Object.assign({}, whereQuery), { state: true });
                 const serviceCount = yield prisma.reservacion.count({
                     where: whereQuery !== null && whereQuery !== void 0 ? whereQuery : {},
                 });
@@ -81,10 +82,25 @@ var ReservationDatabase;
         });
     }
     ReservationDatabase.searchReservation = searchReservation;
+    function deleteReservationById(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield (0, database_1.withPrismaClient)((prisma) => __awaiter(this, void 0, void 0, function* () {
+                const reservation = yield prisma.reservacion.update({
+                    where: {
+                        id,
+                    },
+                    data: {
+                        state: false,
+                    },
+                });
+            }));
+        });
+    }
+    ReservationDatabase.deleteReservationById = deleteReservationById;
     function createReservation(reservationInformation) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield (0, database_1.withPrismaClient)((prisma) => __awaiter(this, void 0, void 0, function* () {
-                const service = yield prisma.reservacion.create({
+                const reservation = yield prisma.reservacion.create({
                     data: {
                         idUser: reservationInformation.idUser,
                         nameClient: reservationInformation.nameClient,
@@ -92,16 +108,31 @@ var ReservationDatabase;
                         cantidadAdultos: reservationInformation.cantidadAdultos,
                         cantidadNinos: reservationInformation.cantidadNinos,
                         fecha: reservationInformation.fecha,
+                        fechaFin: reservationInformation.fechaFin,
                         horaInicio: reservationInformation.horaInicio,
                         horaFin: reservationInformation.horaFin,
                         tipoEvento: reservationInformation.tipoEvento,
                         downPayment: reservationInformation.downPayment,
-                        priceRoomPerHour: reservationInformation.priceRoomPerHour
+                        priceRoomPerHour: reservationInformation.priceRoomPerHour,
+                        inventory: reservationInformation.inventory
                     },
                 });
-                return service !== null && service !== void 0 ? service : null;
+                return reservation !== null && reservation !== void 0 ? reservation : null;
             }));
         });
     }
     ReservationDatabase.createReservation = createReservation;
+    function updateReservationById(id, changes) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield (0, database_1.withPrismaClient)((prisma) => __awaiter(this, void 0, void 0, function* () {
+                return yield prisma.reservacion.update({
+                    where: {
+                        id,
+                    },
+                    data: changes,
+                });
+            }));
+        });
+    }
+    ReservationDatabase.updateReservationById = updateReservationById;
 })(ReservationDatabase = exports.ReservationDatabase || (exports.ReservationDatabase = {}));

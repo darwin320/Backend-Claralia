@@ -58,20 +58,33 @@ class ReservationApiEndpoint extends apiEndpoint_1.ApiEndpoint {
                 cantidadAdultos: request.body.cantidadAdultos,
                 cantidadNinos: request.body.cantidadNinos,
                 fecha: request.body.fecha,
+                fechaFin: request.body.fechaFin,
                 horaInicio: request.body.horaInicio,
                 horaFin: request.body.horaFin,
                 tipoEvento: request.body.tipoEvento,
                 downPayment: request.body.downPayment,
-                priceRoomPerHour: request.body.priceRoomPerHour
+                priceRoomPerHour: request.body.priceRoomPerHour,
+                inventory: request.body.inventory
             });
             response.send(result);
         }));
         // throw new Error("Method not implemented.");
     }
     updateElement(app) {
+        app.put(this.getUrlWithExtension("update/:reservationId"), auth_1.authorize, auth_1.authorizeOnRole, audit_1.logMotion, (request, response) => __awaiter(this, void 0, void 0, function* () {
+            const reservationId = parseInt(request.params["reservationId"]);
+            const changes = request.body;
+            const result = yield reservationDatabase_1.ReservationDatabase.updateReservationById(reservationId, changes);
+            response.send(result);
+        }));
         //throw new Error("Method not implemented.");
     }
     deleteElement(app) {
+        app.delete(this.getUrlWithExtension("delete/:ReservationId"), auth_1.authorize, auth_1.authorizeOnRole, audit_1.logMotion, (request, response) => __awaiter(this, void 0, void 0, function* () {
+            const reservationId = parseInt(request.params["ReservationId"]);
+            const result = yield reservationDatabase_1.ReservationDatabase.deleteReservationById(reservationId);
+            response.send(result);
+        }));
         //throw new Error("Method not implemented.");
     }
     registerCustomMethods(app) {
