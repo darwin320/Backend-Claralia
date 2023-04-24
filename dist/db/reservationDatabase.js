@@ -114,9 +114,26 @@ var ReservationDatabase;
                         tipoEvento: reservationInformation.tipoEvento,
                         downPayment: reservationInformation.downPayment,
                         priceRoomPerHour: reservationInformation.priceRoomPerHour,
-                        inventory: reservationInformation.inventory
                     },
                 });
+                console.log("size: ", reservationInformation.inventory.length);
+                for (const inv of reservationInformation.inventory) {
+                    yield prisma.inventory.create({
+                        data: {
+                            reservacionId: reservation.id,
+                            servicios: {
+                                create: {
+                                    nameService: inv.nameService,
+                                    typeService: inv.typeService,
+                                    nameSupplier: inv.nameSupplier,
+                                    company: inv.company,
+                                    phoneNumber: inv.phoneNumber,
+                                    description: inv.description,
+                                },
+                            },
+                        },
+                    });
+                }
                 return reservation !== null && reservation !== void 0 ? reservation : null;
             }));
         });

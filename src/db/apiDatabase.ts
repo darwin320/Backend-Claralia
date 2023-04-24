@@ -1,30 +1,10 @@
 import { Api, ApisOnRoles, PrismaClient } from "@prisma/client";
-import { DEFAULT_ROLES } from "../models/role";
 
 import { withPrismaClient } from "./database";
 
 export namespace ApiDatabase {
     export async function updateApisOnRoles(changes: ApisOnRoles) {
-        return await withPrismaClient(async (prisma: PrismaClient) => {
-            // If it's the super user, don't update
-            if (changes.roleId === DEFAULT_ROLES.superAdmin.id) {
-                return;
-            }
 
-            return await prisma.apisOnRoles.update({
-                where: {
-                    apiId_roleId: {
-                        apiId: changes.apiId,
-                        roleId: changes.roleId,
-                    },
-                },
-                data: {
-                    get: changes.get,
-                    post: changes.post,
-                    delete: changes.delete,
-                },
-            });
-        });
     }
 
     export async function getApi(name: string): Promise<Api | null> {

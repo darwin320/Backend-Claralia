@@ -11,124 +11,13 @@ datasource db {
   
 }
 
-model User {
-  id        Int    @id @default(autoincrement())
-  firstName String @db.VarChar(280)
-  lastName  String @db.VarChar(280)
-  password  String
-  email     String @unique @db.VarChar(280)
-
-  role   Role @relation(fields: [roleId], references: [id])
-  roleId Int
+model CampanasCRM {
+  id    Int @id @default(autoincrement())
+  Nombre    String 
+  Apellido String 
+  Telefono  String 
+  Direccion  String
+  CampanaCode String
+  Fecha  DateTime
 }
 
-model Role {
-  id          Int           @id @default(autoincrement())
-  name        String        @db.VarChar(255)
-  user        User[]
-  apisOnRoles ApisOnRoles[]
-}
-
-model Api {
-  id          Int           @id @default(autoincrement())
-  name        String        @unique
-  apisOnRoles ApisOnRoles[]
-}
-
-model Action {
-  id     Int      @id @default(autoincrement())
-  method String
-  url    String
-  date   DateTime
-
-  userEmail String
-}
-
-model ApisOnRoles {
-  api   Api @relation(fields: [apiId], references: [id])
-  apiId Int
-
-  role   Role @relation(fields: [roleId], references: [id])
-  roleId Int
-
-  get    Boolean @default(false)
-  post   Boolean @default(false)
-  delete Boolean @default(false)
-
-  @@id([apiId, roleId])
-}
-
-model Config {
-  key   String @id
-  value String
-}
-
-
-// Define el enumerado TypeService
-enum TypeService {
-  Comida
-  Baile
-  Musica
-  Show
-  Otro
-}
-
-// Define la tabla Servicio
-model Service {
-
-  
-  id            Int      @id @default(autoincrement())
-  nameService   String   @db.VarChar(50)
-  typeService   TypeService
-  nameSupplier  String   @db.VarChar(50)
-  company       String   @db.VarChar(50)
-  phoneNumber   String   @db.VarChar(200)
-  description   String
-
-  reservacionesServicio Inventory[]
-
-  // Indica que la columna nameService debe ser única
-  @@unique([nameService])
-}
-
-enum TypeSalon {
-  interior
-  exterior
-}
-
-// Define el enumerado TypeEvent
-enum TypeEvent {
-  boda
-  quinceanera
-  cumpleanos
-  graduacion
-  otro
-}
-
-// Define la tabla Reservacion
-model Reservacion {
-  id                 Int                @id @default(autoincrement())
-  idUser             Int
-  nameClient         String             @db.VarChar(200)
-  salon              TypeSalon
-  cantidadAdultos    Int
-  cantidadNinos      Int
-  fecha              String
-  fechaFin           String
-  horaInicio         DateTime
-  horaFin            DateTime
-  tipoEvento         TypeEvent
-  downPayment        Float
-  priceRoomPerHour   Float
-  inventory          Inventory[]
-  state              Boolean @default(true)
-}
-
-model Inventory {
-  id           Int       @id @default(autoincrement())
-  price         Float
-  description   String
-  reservacion  Reservacion @relation(fields: [reservacionId], references: [id])
-  reservacionId Int
-  servicios     Service[]
-}

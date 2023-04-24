@@ -10,31 +10,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ApiDatabase = void 0;
-const role_1 = require("../models/role");
 const database_1 = require("./database");
 var ApiDatabase;
 (function (ApiDatabase) {
     function updateApisOnRoles(changes) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield (0, database_1.withPrismaClient)((prisma) => __awaiter(this, void 0, void 0, function* () {
-                // If it's the super user, don't update
-                if (changes.roleId === role_1.DEFAULT_ROLES.superAdmin.id) {
-                    return;
-                }
-                return yield prisma.apisOnRoles.update({
-                    where: {
-                        apiId_roleId: {
-                            apiId: changes.apiId,
-                            roleId: changes.roleId,
-                        },
-                    },
-                    data: {
-                        get: changes.get,
-                        post: changes.post,
-                        delete: changes.delete,
-                    },
-                });
-            }));
         });
     }
     ApiDatabase.updateApisOnRoles = updateApisOnRoles;
