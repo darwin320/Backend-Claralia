@@ -21,3 +21,8 @@ model CampanasCRM {
   Fecha  DateTime
 }
 
+
+model Api {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+}

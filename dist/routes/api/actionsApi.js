@@ -4,7 +4,7 @@ exports.ActionsApiEndpoint = void 0;
 const apiEndpoint_1 = require("../api/apiEndpoint");
 class ActionsApiEndpoint extends apiEndpoint_1.ApiEndpoint {
     getElementById(app) {
-        throw new Error("Method not implemented.");
+        //throw new Error("Method not implemented.");
     }
     getElementsType(app) {
         //throw new Error("Method not implemented.");

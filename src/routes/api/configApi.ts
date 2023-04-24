@@ -1,8 +1,6 @@
 import { Request, Response } from "express";
 import { Ok } from "ts-results";
-import { logMotion } from "../../audit/audit";
 import { CronJobManager } from "../../cron/cron";
-import { ConfigDatabase } from "../../db/configDatabase";
 import { ApiEndpoint } from "../api/apiEndpoint";
 
 

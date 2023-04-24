@@ -1,5 +1,4 @@
 import { Job, scheduleJob } from "node-schedule";
-import { ConfigDatabase } from "../db/configDatabase";
 import { getNextInvoiceGenerationDate } from "../models/config";
 
 export class CronJobManager {
@@ -20,33 +19,5 @@ export class CronJobManager {
     }
 
     public resetInvoiceGenerationDateJob() {
-        if (this.invoiceGenerationJob) {
-            this.invoiceGenerationJob.cancel();
-            delete this.invoiceGenerationJob;
-        }
-
-        ConfigDatabase.getInvoiceGenerationDate().then((config) => {
-            if (config.ok) {
-                const invoiceGenerationDate = new Date(config.val.value);
-
-                this.invoiceGenerationJob = scheduleJob(
-                    invoiceGenerationDate,
-                    // TODO: We should move this somewhere else.
-                    async () => {
-                        // This order is important, first we need to generate
-                        // the invoice date, so when we generate the invoices
-                        // the next date for the payment is shown.
-                        await ConfigDatabase.updateInvoiceGenerationDate({
-                            date: getNextInvoiceGenerationDate(),
-                        });
-
-                        
-
-
-                        this.resetInvoiceGenerationDateJob();
-                    }
-                );
-            }
-        });
     }
 }

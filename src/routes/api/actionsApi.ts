@@ -1,11 +1,9 @@
 import { Request, Response } from "express";
-import { logMotion } from "../../audit/audit";
-import { ActionDatabase } from "../../db/actionDatabase";
 import { ApiEndpoint } from "../api/apiEndpoint";
 
 export class ActionsApiEndpoint extends ApiEndpoint {
     public getElementById(app: any): void {
-        throw new Error("Method not implemented.");
+        //throw new Error("Method not implemented.");
     }
     public getElementsType(app: any): void {
         //throw new Error("Method not implemented.");
