@@ -11,27 +11,21 @@ datasource db {
   
 }
 
-model User {
-  id        Int    @id @default(autoincrement())
-  firstName String @db.VarChar(280)
-  lastName  String @db.VarChar(280)
-  password  String
-  email     String @unique @db.VarChar(280)
-
-  role   Role @relation(fields: [roleId], references: [id])
-  roleId Int
+model CampanasCRM {
+  id    Int @id @default(autoincrement())
+  Nombre    String 
+  Apellido String 
+  Telefono  String 
+  Direccion  String
+  CampanaCode String
+  Fecha  DateTime
 }
 
-model Role {
-  id          Int           @id @default(autoincrement())
-  name        String        @db.VarChar(255)
-  user        User[]
-  apisOnRoles ApisOnRoles[]
-}
 
 model Api {
   id          Int           @id @default(autoincrement())
   name        String        @unique
+<<<<<<< HEAD
   apisOnRoles ApisOnRoles[]
 }
 
@@ -125,4 +119,6 @@ model Inventory {
   reservacion    Reservacion  @relation(fields: [reservacionId], references: [id])
   reservacionId       Int @unique
   servicios     Service[] 
+=======
+>>>>>>> 64ac6723d150ab57c347a2b0299c3c0ee6cdbcb5
 }

@@ -29,7 +29,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importStar(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
-const auth_1 = require("./routes/auth");
 const apis_1 = require("./routes/apis");
 const passport_1 = __importDefault(require("passport"));
 const cron_js_1 = require("./cron/cron.js");
@@ -56,7 +55,6 @@ app.use((0, express_session_1.default)({
 }));
 app.use(passport_1.default.initialize());
 app.use(passport_1.default.session());
-(0, auth_1.configureAuthModule)(app);
 (0, apis_1.configureApiModule)(app);
 cron_js_1.CronJobManager.getInstance();
 app.listen(process.env.PORT, () => {
