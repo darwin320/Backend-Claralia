@@ -16,6 +16,7 @@ export class ServicesApiEndpoint extends ApiEndpoint {
             authorize,
             authorizeOnRole,
             async (_request: Request, response: Response) => {
+                
                 const result = await ServiceDatabase.getServices();
                 response.send(result); 
             }
@@ -29,6 +30,7 @@ export class ServicesApiEndpoint extends ApiEndpoint {
             authorizeOnRole,
             async (request: Request, response: Response) => {
                 const result = await ServiceDatabase.getTypeServices();
+                
                 response.send(result);
             }
         );
@@ -87,6 +89,7 @@ export class ServicesApiEndpoint extends ApiEndpoint {
                     company:       request.body.company,
                     phoneNumber: request.body.phoneNumber,
                     description: request.body.description,
+                    price: request.body.price
                 });
                 response.send(result);
             }

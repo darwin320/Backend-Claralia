@@ -17,7 +17,9 @@ var ReservationDatabase;
     function getReservations() {
         return __awaiter(this, void 0, void 0, function* () {
             return yield (0, database_1.withPrismaClient)((prisma) => __awaiter(this, void 0, void 0, function* () {
-                return yield prisma.reservacion.findMany();
+                return yield prisma.reservacion.findMany({
+                    include: { inventario: true }
+                });
             }));
         });
     }
@@ -38,18 +40,19 @@ var ReservationDatabase;
         });
     }
     ReservationDatabase.getTypeSalon = getTypeSalon;
-    function getReservationById(reservationId) {
+    function getInventoryWithServices(idReservation) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield (0, database_1.withPrismaClient)((prisma) => __awaiter(this, void 0, void 0, function* () {
-                return yield prisma.reservacion.findUnique({
+                return yield prisma.inventory.findUnique({
                     where: {
-                        id: reservationId,
+                        reservacionId: idReservation,
                     },
+                    include: { servicios: true },
                 });
             }));
         });
     }
-    ReservationDatabase.getReservationById = getReservationById;
+    ReservationDatabase.getInventoryWithServices = getInventoryWithServices;
     function searchReservation(search = "", skip, take) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield (0, database_1.withPrismaClient)((prisma) => __awaiter(this, void 0, void 0, function* () {
@@ -99,7 +102,8 @@ var ReservationDatabase;
     ReservationDatabase.deleteReservationById = deleteReservationById;
     function createReservation(reservationInformation) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield (0, database_1.withPrismaClient)((prisma) => __awaiter(this, void 0, void 0, function* () {
+            const prisma = new client_1.PrismaClient();
+            try {
                 const reservation = yield prisma.reservacion.create({
                     data: {
                         idUser: reservationInformation.idUser,
@@ -114,14 +118,67 @@ var ReservationDatabase;
                         tipoEvento: reservationInformation.tipoEvento,
                         downPayment: reservationInformation.downPayment,
                         priceRoomPerHour: reservationInformation.priceRoomPerHour,
-                        inventory: reservationInformation.inventory
                     },
                 });
-                return reservation !== null && reservation !== void 0 ? reservation : null;
-            }));
+                const inventory = yield prisma.inventory.create({
+                    data: {
+                        reservacionId: reservation.id,
+                    },
+                });
+                const serviceIds = [];
+                for (const inv of reservationInformation.inventory) {
+                    const service = yield prisma.service.create({
+                        data: {
+                            nameService: inv.nameService,
+                            typeService: inv.typeService,
+                            nameSupplier: inv.nameSupplier,
+                            company: inv.company,
+                            phoneNumber: inv.phoneNumber,
+                            description: inv.description,
+                            inventory: {
+                                connect: {
+                                    id: inventory.id,
+                                },
+                            },
+                            price: Number(inv.price)
+                        },
+                    });
+                    serviceIds.push({ id: service.id });
+                }
+                yield prisma.inventory.update({
+                    where: { id: inventory.id },
+                    data: { servicios: { connect: serviceIds } },
+                });
+                return reservation;
+            }
+            catch (error) {
+                console.error(error);
+                return null;
+            }
+            finally {
+                yield prisma.$disconnect();
+            }
         });
     }
     ReservationDatabase.createReservation = createReservation;
+    function getReservationById(reservationId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield (0, database_1.withPrismaClient)((prisma) => __awaiter(this, void 0, void 0, function* () {
+                const update = yield prisma.reservacion.findUnique({
+                    where: {
+                        id: reservationId,
+                    },
+                    include: {
+                        inventario: {
+                            include: { servicios: true }
+                        }
+                    },
+                });
+                return update;
+            }));
+        });
+    }
+    ReservationDatabase.getReservationById = getReservationById;
     function updateReservationById(id, changes) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield (0, database_1.withPrismaClient)((prisma) => __awaiter(this, void 0, void 0, function* () {
@@ -129,10 +186,34 @@ var ReservationDatabase;
                     where: {
                         id,
                     },
+                    include: {
+                        inventario: {
+                            include: { servicios: true }
+                        }
+                    },
                     data: changes,
                 });
             }));
         });
     }
     ReservationDatabase.updateReservationById = updateReservationById;
+    function updateServices(services) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield (0, database_1.withPrismaClient)((prisma) => __awaiter(this, void 0, void 0, function* () {
+                const updatedServices = [];
+                for (const service of services) {
+                    const updatedServiceData = Object.assign(Object.assign({}, service), { price: parseFloat(service.price) });
+                    const updatedService = yield prisma.service.update({
+                        where: {
+                            id: service.id,
+                        },
+                        data: updatedServiceData,
+                    });
+                    updatedServices.push(updatedService);
+                }
+                return updatedServices;
+            }));
+        });
+    }
+    ReservationDatabase.updateServices = updateServices;
 })(ReservationDatabase = exports.ReservationDatabase || (exports.ReservationDatabase = {}));

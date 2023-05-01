@@ -55,6 +55,7 @@ class ServicesApiEndpoint extends apiEndpoint_1.ApiEndpoint {
                 company: request.body.company,
                 phoneNumber: request.body.phoneNumber,
                 description: request.body.description,
+                price: request.body.price
             });
             response.send(result);
         }));

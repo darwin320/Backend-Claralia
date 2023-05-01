@@ -1,4 +1,4 @@
-import {PrismaClient ,Reservacion,TypeSalon,TypeEvent,Inventory} from "@prisma/client";
+import {PrismaClient ,Reservacion,TypeSalon,TypeEvent,Inventory,TypeService,Service} from "@prisma/client";
 import { SearchResult, SEARCH_AMOUNT, withPrismaClient } from "./database";
 
 
@@ -7,7 +7,9 @@ export namespace ReservationDatabase{
     export async function getReservations() { 
         return await withPrismaClient<Reservacion[]>(
             async (prisma: PrismaClient) => {
-                return await prisma.reservacion.findMany();
+                return await prisma.reservacion.findMany({
+                    include: {inventario:true}
+                });
             }
         );
     }
@@ -28,17 +30,22 @@ export namespace ReservationDatabase{
         );
     }
 
-    export async function getReservationById(reservationId: number) {
-        return await withPrismaClient<Reservacion | null>(
+
+
+    export async function getInventoryWithServices(idReservation: number) {
+        return await withPrismaClient<Inventory | null>(
             async (prisma: PrismaClient) => {
-                return await prisma.reservacion.findUnique({
+                return await prisma.inventory.findUnique({
                     where: {
-                        id: reservationId,
+                        reservacionId: idReservation,
                     },
+                    include: {servicios:true},
                 });
+                
             }
         );
     }
+    
 
 
 
@@ -85,6 +92,9 @@ export namespace ReservationDatabase{
         );
     }
 
+
+   
+
     export async function deleteReservationById(id: number) {
         return await withPrismaClient(async (prisma: PrismaClient) => {
 
@@ -100,6 +110,7 @@ export namespace ReservationDatabase{
     }
 
 
+
     export async function createReservation(reservationInformation: {
         idUser:number;
         nameClient: string;
@@ -113,28 +124,87 @@ export namespace ReservationDatabase{
         tipoEvento: TypeEvent;
         downPayment: number;
         priceRoomPerHour: number;
-        inventory:  Inventory[];
+        inventory: Service[]
     }) {
+        const prisma = new PrismaClient();
+      
+        try {
+          const reservation = await prisma.reservacion.create({
+            data: {
+              idUser: reservationInformation.idUser,
+              nameClient: reservationInformation.nameClient,
+              salon: reservationInformation.salon,
+              cantidadAdultos: reservationInformation.cantidadAdultos,
+              cantidadNinos: reservationInformation.cantidadNinos,
+              fecha: reservationInformation.fecha,
+              fechaFin: reservationInformation.fechaFin,
+              horaInicio: reservationInformation.horaInicio,
+              horaFin: reservationInformation.horaFin,
+              tipoEvento: reservationInformation.tipoEvento,
+              downPayment: reservationInformation.downPayment,
+              priceRoomPerHour: reservationInformation.priceRoomPerHour,
+            },
+          });
+      
+          const inventory = await prisma.inventory.create({
+            data: {
+              reservacionId: reservation.id,
+            },
+          });
+      
+          const serviceIds = [];
+          for (const inv of reservationInformation.inventory) {
+            const service = await prisma.service.create({
+              data: {
+                nameService: inv.nameService,
+                typeService: inv.typeService,
+                nameSupplier: inv.nameSupplier,
+                company: inv.company,
+                phoneNumber: inv.phoneNumber,
+                description: inv.description,
+                inventory: {
+                  connect: {
+                    id: inventory.id,
+                  },
+                },
+                price: Number(inv.price) 
+              },
+            });
+      
+            serviceIds.push({ id: service.id });
+        
+          }
+      
+          await prisma.inventory.update({
+            where: { id: inventory.id },
+            data: { servicios: { connect: serviceIds } },
+          });
+
+          
+      
+          return reservation;
+        } catch (error) {
+          console.error(error);
+          return null;
+        } finally {
+          await prisma.$disconnect();
+        }
+      }
+
+      export async function getReservationById(reservationId: number) {
         return await withPrismaClient<Reservacion | null>(
             async (prisma: PrismaClient) => {
-                const reservation = await prisma.reservacion.create({
-                    data: {
-                        idUser: reservationInformation.idUser,
-                        nameClient: reservationInformation.nameClient,
-                        salon : reservationInformation.salon,
-                        cantidadAdultos: reservationInformation.cantidadAdultos,
-                        cantidadNinos: reservationInformation.cantidadNinos,
-                        fecha: reservationInformation.fecha,
-                        fechaFin: reservationInformation.fechaFin,
-                        horaInicio: reservationInformation.horaInicio,
-                        horaFin: reservationInformation.horaFin,
-                        tipoEvento : reservationInformation.tipoEvento,
-                        downPayment: reservationInformation.downPayment,
-                        priceRoomPerHour: reservationInformation.priceRoomPerHour,
-                        inventory: reservationInformation.inventory
+                const update =  await prisma.reservacion.findUnique({
+                    where: {
+                        id: reservationId,
                     },
-                });
-                return reservation ?? null;
+                    include: {
+                        inventario: {
+                            include: { servicios: true }
+                        }
+                    },
+                });     
+                return update           
             }
         );
     }
@@ -142,14 +212,51 @@ export namespace ReservationDatabase{
 
     export async function updateReservationById(id: number, changes: Reservacion) {
         return await withPrismaClient(async (prisma: PrismaClient) => {
+            
             return await prisma.reservacion.update({
                 where: {
                     id,
                 },
+                include: {
+                    inventario: {
+                        include: { servicios: true }
+                    }
+                },
                 data: changes,
-            });
+            }); 
         });
     }
+
+    export async function updateServices(services: Service[]) {
+        return await withPrismaClient(async (prisma: PrismaClient) => {
+            const updatedServices = [];
+            for (const service of services) {
+                const updatedServiceData = {
+                    ...service,
+                    price: parseFloat(service.price as unknown as string),
+                };
+                const updatedService = await prisma.service.update({
+                    where: {
+                        id: service.id,
+                    },
+                    data: updatedServiceData,
+                });
+
+                updatedServices.push(updatedService);
+            }
+            return updatedServices;
+        });
+    }
+    
+    
+    
+    
+    
+
+    
+    
+    
+
 
 
 }

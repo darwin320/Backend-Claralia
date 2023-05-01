@@ -25,6 +25,7 @@ var ServiceDatabase;
                         company: serviceInformation.company,
                         phoneNumber: serviceInformation.phoneNumber,
                         description: serviceInformation.description,
+                        price: serviceInformation.price
                     },
                 });
                 return service !== null && service !== void 0 ? service : null;
@@ -43,7 +44,14 @@ var ServiceDatabase;
     function getServices() {
         return __awaiter(this, void 0, void 0, function* () {
             return yield (0, database_1.withPrismaClient)((prisma) => __awaiter(this, void 0, void 0, function* () {
-                return yield prisma.service.findMany();
+                const xd = yield prisma.service.findMany({
+                    where: {
+                        inventory: {
+                            none: {},
+                        },
+                    },
+                });
+                return xd;
             }));
         });
     }
@@ -89,15 +97,37 @@ var ServiceDatabase;
         return __awaiter(this, void 0, void 0, function* () {
             return yield (0, database_1.withPrismaClient)((prisma) => __awaiter(this, void 0, void 0, function* () {
                 let whereQuery = null;
+                // Obtener todos los ids de los servicios que tienen al menos un inventario asociado
+                const servicesWithInventory = yield prisma.service.findMany({
+                    where: {
+                        inventory: {
+                            some: {}
+                        }
+                    },
+                    select: {
+                        id: true
+                    }
+                });
+                const serviceIdsWithInventory = servicesWithInventory.map((service) => service.id);
                 if (search.length > 0) {
                     whereQuery = {
-                        OR: [
-                            {
-                                nameService: {
-                                    contains: search,
-                                },
+                        NOT: {
+                            id: {
+                                in: serviceIdsWithInventory
                             },
-                        ],
+                            nameService: {
+                                contains: search,
+                            },
+                        },
+                    };
+                }
+                else {
+                    whereQuery = {
+                        NOT: {
+                            id: {
+                                in: serviceIdsWithInventory
+                            }
+                        }
                     };
                 }
                 const serviceCount = yield prisma.service.count({
