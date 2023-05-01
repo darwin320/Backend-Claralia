@@ -11,6 +11,7 @@ exports.REGISTERED_APIS = [
     new servicesApi_1.ServicesApiEndpoint(),
     new reservationApi_1.ReservationApiEndpoint()
 ];
+//CONFIGURA MODULIS
 function configureApiModule(app) {
     for (const api of exports.REGISTERED_APIS) {
         api.registerMethods(app);

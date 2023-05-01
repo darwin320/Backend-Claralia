@@ -9,6 +9,7 @@ export namespace ServiceDatabase {
         company: string;
         phoneNumber: string;
         description: string;
+        price: number
        
     }) {
         return await withPrismaClient<Service | null>(
@@ -21,6 +22,7 @@ export namespace ServiceDatabase {
                         company:       serviceInformation.company,
                         phoneNumber: serviceInformation.phoneNumber,
                         description: serviceInformation.description,
+                        price: serviceInformation.price
                     },
                 });
                 return service ?? null;
@@ -39,7 +41,14 @@ export namespace ServiceDatabase {
     export async function getServices() { 
         return await withPrismaClient<Service[]>(
             async (prisma: PrismaClient) => {
-                return await prisma.service.findMany();
+                const xd =  await prisma.service.findMany({
+                    where: {
+                      inventory: {
+                        none: {},
+                      },
+                    },
+                  });
+                  return xd;
             }
         );
     }
@@ -53,6 +62,7 @@ export namespace ServiceDatabase {
                     where: {
                         id: serviceId,
                     },
+                    
                 });
             }
         );
@@ -83,40 +93,65 @@ export namespace ServiceDatabase {
         search: string = "",
         skip?: number,
         take?: number
-    ) {
+      ) {
         return await withPrismaClient<SearchResult<Service>>(
-            async (prisma: PrismaClient) => {
-                let whereQuery = null;
-
-                if (search.length > 0) {
-                    whereQuery = {
-                        OR: [
-                            {
-                                nameService: {
-                                    contains: search,
-                                },
-                            },
-                        ],
-                    };
+          async (prisma: PrismaClient) => {
+            let whereQuery = null;
+      
+            // Obtener todos los ids de los servicios que tienen al menos un inventario asociado
+            const servicesWithInventory = await prisma.service.findMany({
+              where: {
+                inventory: {
+                  some: {}
                 }
-
-                const serviceCount = await prisma.service.count({
-                    where: whereQuery ?? {},
-                });
-                const services = await prisma.service.findMany({
-                    where: whereQuery ?? {},
-                    skip: skip ?? 0,
-                    take: take ?? SEARCH_AMOUNT,
-                });
-
-                return {
-                    search: services,
-                    searchCount: serviceCount,
-                };
+              },
+              select: {
+                id: true
+              }
+            });
+            const serviceIdsWithInventory = servicesWithInventory.map(
+              (service) => service.id
+            );
+      
+            if (search.length > 0) {
+              whereQuery = {
+                NOT: {
+                  id: {
+                    in: serviceIdsWithInventory
+                  },
+                  nameService: {
+                    contains: search,
+                  },
+                },
+              };
+            } else {
+              whereQuery = {
+                NOT: {
+                  id: {
+                    in: serviceIdsWithInventory
+                  }
+                }
+              };
             }
+      
+            const serviceCount = await prisma.service.count({
+              where: whereQuery ?? {},
+            });
+            const services = await prisma.service.findMany({
+              where: whereQuery ?? {},
+              skip: skip ?? 0,
+              take: take ?? SEARCH_AMOUNT,
+            });
+      
+            return {
+              search: services,
+              searchCount: serviceCount,
+            };
+          }
         );
-    }
-
+      }
+      
+      
 }
 
   

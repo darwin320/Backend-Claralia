@@ -66,15 +66,15 @@ model Config {
 
 // Define el enumerado TypeService
 enum TypeService {
-  type1
-  type2
-  type3
+  Comida
+  Musica
+  Baile
+  Decoracion
+  Otro
 }
 
 // Define la tabla Servicio
 model Service {
-
-  
   id            Int      @id @default(autoincrement())
   nameService   String   @db.VarChar(50)
   typeService   TypeService
@@ -82,11 +82,8 @@ model Service {
   company       String   @db.VarChar(50)
   phoneNumber   String   @db.VarChar(200)
   description   String
-
-  reservacionesServicio ReservacionServicio[]
-
-  // Indica que la columna nameService debe ser única
-  @@unique([nameService])
+  price         Float?
+  inventory     Inventory[] // add this line
 }
 
 enum TypeSalon {
@@ -112,19 +109,20 @@ model Reservacion {
   cantidadAdultos    Int
   cantidadNinos      Int
   fecha              String
+  fechaFin           String
   horaInicio         DateTime
   horaFin            DateTime
   tipoEvento         TypeEvent
   downPayment        Float
   priceRoomPerHour   Float
-  servicios          ReservacionServicio[]
+  inventario         Inventory?
+  state              Boolean @default(true)
 }
 
-model ReservacionServicio {
+
+model Inventory {
   id           Int       @id @default(autoincrement())
-  price         Float
-  description   String
-  reservacion  Reservacion @relation(fields: [reservacionId], references: [id])
-  reservacionId Int
-  servicios     Service[]
+  reservacion    Reservacion  @relation(fields: [reservacionId], references: [id])
+  reservacionId       Int @unique
+  servicios     Service[] 
 }
