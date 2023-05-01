@@ -118,7 +118,6 @@ export class ReservationApiEndpoint extends ApiEndpoint {
                 );
 
                 if (inventario && inventario.servicios) {
-                    console.log(inventario.servicios)
                     const updatedServices = await ReservationDatabase.updateServices(inventario.servicios);
                     // Aquí puedes decidir cómo combinar 'result' y 'updatedServices' si es necesario.
                     // Por ejemplo, podrías agregar 'updatedServices' al objeto 'inventario' en 'result'.

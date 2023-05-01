@@ -2,6 +2,7 @@ import express, { json, urlencoded } from 'express';
 import dotenv from 'dotenv'
 
 import cors from 'cors';
+import {configureAuthModule} from './routes/auth'
 import {configureApiModule} from './routes/apis'
 import passport from "passport";
 import { CronJobManager } from "./cron/cron.js";
@@ -41,6 +42,7 @@ import session from "express-session";
         app.use(passport.initialize());
         app.use(passport.session());
             
+        configureAuthModule(app);
         
         configureApiModule(app);
 
